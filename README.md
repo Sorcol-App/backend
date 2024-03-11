@@ -9,7 +9,10 @@ Sorcol es una plataforma educativa diseñada para enseñar lengua de señas colo
 
 - JavaScript
 - Node.js
+- Express
 - MongoDB
+- JSON Web Tokens (JWT)
+- Bcrypt
 
 ## Instalación
 
