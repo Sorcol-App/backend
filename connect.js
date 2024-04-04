@@ -1,27 +1,9 @@
-const { MongoClient } = require('mongodb');
-const config = require('./config');
+// Conexion base de datos
 
-// eslint-disable-next-line no-unused-vars
-const { databaseUrl } = config;
-const options = {
-  connectTimeoutMS: 3000,
-  socketTimeoutMS: 3000,
-  serverSelectionTimeoutMS: 3000,
-};
-const client = new MongoClient(config.databaseUrl, options);
+const { createClient } = require ("@supabase/supabase-js");
 
-async function connect() {
-  try {
-    await client.connect();
-    const db = client.db('sorcol_prueba');
-    console.log('Conexión establecida con la base de datos');
-    return db;
-  } catch (error) {
-    console.error('Error al conectar con la base de datos:', error);
-    throw error; // Reenvía el error para que se maneje en el archivo index.js
-  }
-}
+const supabaseUrl = process.env.DATABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Hemos decidido trabajar con Supabase y PostgreSQL, por favor tener en cuenta esto antes de avanzar.
-
-module.exports = { connect };
+module.exports = {supabase};
