@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/users');
+const {getUser} = require('../controllers/users');
+const { supabase } = require('./connect');
 
 // Ruta para registrar un nuevo usuario
-router.post('/register', userController.registerUser);
+router.get('/users', getUser);
 
 // Ruta para iniciar sesión
 router.post('/login', userController.loginUser);
@@ -11,3 +12,5 @@ router.post('/login', userController.loginUser);
 // Otras rutas relacionadas con usuarios...
 
 module.exports = router;
+
+
