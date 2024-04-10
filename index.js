@@ -1,9 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const express = require('express');
-
-// Reemplaza estas variables con tu información de Supabase
-const SUPABASE_URL = 'https://kzdrxokqqqetftgwpsly.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6ZHJ4b2txcXFldGZ0Z3dwc2x5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNTk3NjIsImV4cCI6MjAyNzgzNTc2Mn0.cM9DwBz4CaY__b07eKBVGc4Ptxs_XENrnOjqy3Vs8s8';
+const config = require('./config');
 
 // Crea un cliente de Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -28,7 +25,7 @@ app.get('/productos', async (req, res) => {
 });
 
 app.post('/productos', async (req, res) => {
-  const  name  = req.body;
+  const name = req.body;
   console.log(name, 'body');
 
   const { data, error } = await supabase.from('productos').insert({
