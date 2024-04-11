@@ -41,6 +41,7 @@ module.exports = {
   postNewUser: async (req, resp) => {
     try {
       const { email, password } = req.body;
+      
 
       // Validación de campos
       if (!email || !password) {
@@ -81,7 +82,7 @@ module.exports = {
       }
 
       // Generar un token JWT
-      const token = jwt.sign({ userId: newUser[0].id }, secret, {
+      const token = jwt.sign({ email }, secret, {
         expiresIn: '1h',
       });
 
