@@ -1,177 +1,77 @@
-// const { postNewUser } = require('../../controllers/usersController'); // Asegúrate de importar correctamente la función
+const request = require ('supertest');
+const app = require('../../../index'); // Importa tu aplicación Express
+const { postNewUser } = require('../usersController');
+const supabase = require('../../../connect'); // Importa tu configuración de Supabase aquí
 
-// describe('postNewUser', () => {
-//   it('should respond with status 201 and a JWT token for valid input', async () => {
-//     // Datos de prueba
-//     const mockReq = {
-//       body: {
-//         email: 'test@example.com',
-//         password: 'password123',
-//       },
-//     };
-//     const mockRes = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     };
+describe('postNewUser', () => {
+  let req, resp;
 
-//     // Llamar a la función con datos de prueba simulados
-//     await postNewUser(mockReq, mockRes);
-
-//     // Verificar que la función respondió correctamente
-//     expect(mockRes.status).toHaveBeenCalledWith(201);
-//     expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({ token: expect.any(String) }));
-//   });
-
-//   it('should respond with status 400 for incomplete fields', async () => {
-//     // Datos de prueba con campos incompletos
-//     const mockReq = {
-//       body: {
-//         email: 'test@example.com',
-//         // Sin contraseña
-//       },
-//     };
-//     const mockRes = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//     };
-
-//     // Llamar a la función con datos de prueba simulados
-//     await postNewUser(mockReq, mockRes);
-
-//     // Verificar que la función respondió correctamente
-//     expect(mockRes.status).toHaveBeenCalledWith(400);
-//     expect(mockRes.json).toHaveBeenCalledWith({ error: 'Completar campos' });
-//   });
-
-//   // Agregar más pruebas para otros casos de prueba (por ejemplo, contraseña demasiado corta, formato de correo electrónico no válido, etc.)
-// });
-// const { postNewUser } = require('../../controllers/usersController');
-// const { createClient } = require('@supabase/supabase-js');
-// const config = require('../../../config')
-// const supabase = createClient(config.supabaseUrl, config.supabaseKey);
-
-// // Mock de Supabase
-// describe('postNewUser', () => {
-//     let mockSupabase;
-  
-//     beforeEach(() => {
-//       // Mock de Supabase
-//       mockSupabase = {
-//         from: jest.fn().mockReturnThis(),
-//         insert: jest.fn().mockReturnValue(Promise.resolve({ data: null, error: null })),
-//       };
-      
-//       // Sobrescribir la implementación de supabase en user.service.js con el mock
-//       jest.mock('../../../config', () => ({
-//         supabase: mockSupabase,
-//       }));
-//     });
-  
-//   it('should insert a new user into Supabase', async () => {
-//     // Simula una solicitud HTTP enviando un objeto de solicitud vacío (no se usa en la función)
-//     const req = {};
-    
-//     // Simula una función de respuesta HTTP con un método status que devuelve un objeto vacío
-//     const resp = { status: jest.fn().mockReturnValue({ json: jest.fn().mockReturnValue({}) }) };
-    
-//     const email = 'test@example.com';
-//     const password = 'password123';
-    
-//     // Llama a la función del controlador con una solicitud y una respuesta simuladas
-//     await postNewUser(req, resp);
-    
-//     // Verifica que se llamó correctamente a las funciones de Supabase
-//     expect(mockSupabase.from).toHaveBeenCalledWith('users');
-//     expect(mockSupabase.insert).toHaveBeenCalledWith([{ email, password }]);
-//     // Aquí puedes agregar más expectativas según el comportamiento esperado de tu función de controlador
-//   });
-// });
-const request = require('supertest');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { createClient } = require('@supabase/supabase-js');
-const config = require('../../../config');
-const express = require('express');
-const app = express(); // Crea una instancia de la aplicación Express
-
-const supabase = createClient(config.supabaseUrl, config.supabaseKey);
-
-// Mockear la librería de Supabase
-
-describe('POST /api/v1/users', () => {
-    jest.mock('../../../config', () => ({
-        from: () => ({
-          select: () => ({
-            eq: () => ({
-              data: null, // Simula que no existe un usuario con el email dado
-              error: null,
-            }),
-          }),
-          insert: () => ({
-            data: [{ id: 1 }], // Simula la inserción exitosa de un nuevo usuario
-            error: null,
-          }),
-        }),
-      }));
-
-    it('should create a new user and return a JWT token if valid data is provided', async () => {
-      const userData = {
-        email: 'test@example.com',
-        password: 'password123',
-      };
-  
-      const response = await request(app)
-        .post('/api/v1/users')
-        .send(userData)
-        .expect(201);
-        console.log(userData);
-  
-      expect(response.body).toHaveProperty('token');
-  
-      // Verificar que se haya utilizado bcrypt para hashear la contraseña
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      expect(bcrypt.compareSync(userData.password, hashedPassword)).toBe(true);
-  
-      // Verificar que se haya utilizado jwt para firmar el token
-      const decodedToken = jwt.decode(response.body.token);
-      expect(decodedToken.userId).toEqual(1); // Mockeamos la inserción con ID 1
-    });
-  it('should return a 400 error if email or password is missing', async () => {
-      const userData = {
-        password: 'password123',
-      };
-  
-      await request(app)
-        .post('/api/v1/users')
-        .send(userData)
-        .expect(400);
-    });
-  
-    it('should return a 400 error if password length is less than 4 characters', async () => {
-      const userData = {
-        email: 'test@example.com',
-        password: 'abc', // Invalid password (less than 4 characters)
-      };
-  
-      await request(app)
-        .post('/api/v1/users')
-        .send(userData)
-        .expect(400);
-    });
-  
-    it('should return a 400 error if email format is invalid', async () => {
-      const userData = {
-        email: 'invalidemail', // Invalid email format
-        password: 'password123',
-      };
-  
-      await request(app)
-        .post('/api/v1/users')
-        .send(userData)
-        .expect(400);
-    });
-  
-    // Agrega más casos de prueba para otros escenarios, por ejemplo:
-    // - Prueba para usuario existente
-    // - Prueba para errores durante la inserción del usuario en la base de datos
+  beforeEach(() => {
+    req = {
+      body: {},
+    };
+    resp = {
+      status: jest.fn(() => resp),
+      json: jest.fn(),
+    };
   });
+
+  it('debería retornar un error si faltan campos', async () => {
+    await postNewUser(req, resp);
+    expect(resp.status).toHaveBeenCalledWith(400);
+    expect(resp.json).toHaveBeenCalledWith({ error: 'Completar campos' });
+  });
+
+  it('debería retornar un error si la contraseña es demasiado corta', async () => {
+    req.body.email = 'test@example.com';
+    req.body.password = 'abc';
+
+    await postNewUser(req, resp);
+    expect(resp.status).toHaveBeenCalledWith(400);
+    expect(resp.json).toHaveBeenCalledWith({
+      error: 'La contraseña debe tener un mín de 4 caracteres',
+    });
+  });
+
+  it('debería retornar un error si el formato del correo electrónico es inválido', async () => {
+    req.body.email = 'invalidemail';
+    req.body.password = 'password1234';
+
+    await postNewUser(req, resp);
+    expect(resp.status).toHaveBeenCalledWith(400);
+    expect(resp.json).toHaveBeenCalledWith({
+      error: 'Formato de correo electrónico no válido',
+    });
+  });
+
+});
+
+describe('postNewUser', () => {
+
+  const mockSupabase = {
+    from: jest.fn(() => mockSupabase), // Simula el método 'from' que devuelve a sí mismo
+    select: jest.fn().mockReturnThis(), // Simula el método 'select' que devuelve a sí mismo
+    eq: jest.fn().mockReturnThis(), // Simula el método 'eq' que devuelve a sí mismo
+    data: [], // Simula los datos devueltos por la consulta
+  };
+  
+  
+  // Simula la importación de Supabase y asigna el objeto simulado
+  jest.mock('@supabase/supabase-js', () => ({
+    createClient: jest.fn(() => mockSupabase), // Simula la creación del cliente Supabase
+  }));
+
+
+  it('debería retornar un error si el usuario ya existe en Supabase', async () => {
+    // Simula que existe un usuario con el mismo email en Supabase
+    mockSupabase.from().select().eq().data = [{ email: 'existinguser@example.com' }];
+  
+    const response = await request(app)
+      .post('/api/v1/users')
+      .send({ email: 'existinguser@example.com', password: 'password1234' });
+  
+    expect(response.status).toBe(403);
+    expect(response.body).toEqual({ error: 'El usuario ya existe' });
+  });
+
+});

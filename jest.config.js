@@ -1,4 +1,5 @@
 module.exports = {
-    testEnvironment: 'node'
+    testEnvironment: 'node',
+    // moduleDirectories: ['node_modules', './']
   };
   

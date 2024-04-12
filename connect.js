@@ -1,5 +1,4 @@
-// Conexion base de datos
-
+require('dotenv').config();
 const { createClient } = require ("@supabase/supabase-js");
 
 const supabaseUrl = process.env.DATABASE_URL;
