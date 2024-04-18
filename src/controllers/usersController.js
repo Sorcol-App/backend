@@ -65,6 +65,7 @@ module.exports = {
         .from('users')
         .select('*')
         .eq('email', email);
+       
 
       if (existingUser && existingUser.length > 0) {
         return resp.status(403).json({ error: 'El usuario ya existe' });
@@ -74,7 +75,9 @@ module.exports = {
       const hashedPassword = await bcrypt.hash(password, 10);
       const { data: newUser, error: createUserError } = await supabase
         .from('users')
-        .insert([{ email, password: hashedPassword }]);
+        .insert([{ email, password: hashedPassword }])
+        .select('*');
+      
 
       if (createUserError || error) {
         console.error('Error al crear el usuario:', createUserError.message);
@@ -82,11 +85,12 @@ module.exports = {
       }
 
       // Generar un token JWT
-      const token = jwt.sign({ email }, secret, {
-        expiresIn: '1h',
-      });
+      // const token = jwt.sign({ email }, secret, {
+      //   expiresIn: '1h',
+      // });
+      
 
-      resp.status(201).json({ token });
+      resp.status(201).json( { newUser } );
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       resp.status(500).json({ error: 'Error interno del servidor' });
