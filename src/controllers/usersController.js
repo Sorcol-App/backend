@@ -68,6 +68,8 @@ module.exports = {
        
 
       if (existingUser && existingUser.length > 0) {
+        console.log('existingUser:', existingUser);
+
         return resp.status(403).json({ error: 'El usuario ya existe' });
       }
 
@@ -76,7 +78,14 @@ module.exports = {
       const { data: newUser, error: createUserError } = await supabase
         .from('users')
         .insert([{ email, password: hashedPassword }])
-        .select('*');
+       //  .select('*');
+        
+
+        // const { data: userCreate } = await supabase
+        // .from('users')
+        // .select('*')
+        // .eq('email', email);
+        // console.log("antes de finalizar newUser:", userCreate);
       
 
       if (createUserError || error) {
@@ -91,6 +100,7 @@ module.exports = {
       
 
       resp.status(201).json( { newUser } );
+
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       resp.status(500).json({ error: 'Error interno del servidor' });
